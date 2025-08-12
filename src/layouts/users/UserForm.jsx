@@ -103,7 +103,7 @@ export default function UserForm() {
               className="p-text-danger"
             />
           </div>
-
+          {!isEdit&&(
           <div>
             <label>Contraseña:</label>
             <div className="p-inputgroup p-mb-1">
@@ -127,8 +127,7 @@ export default function UserForm() {
               className="p-text-danger"
             />
           </div>
-
-
+          )}
           <div>
             <label>Edad:</label>
             <Field

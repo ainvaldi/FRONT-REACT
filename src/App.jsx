@@ -13,6 +13,8 @@ import { AuthProvider } from './context/AuthContext';
 import LoginForm from './layouts/auth/LoginForm';
 import RegisterForm from './layouts/auth/RegisterForm';
 
+import PrivateRoute from './utils/PrivateRoute';
+
 import './App.css';
 import 'primereact/resources/themes/lara-dark-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -30,9 +32,11 @@ function App() {
               <Route
                 path="/productos/*"
                 element={
-                  <ProductProvider>
-                    <ProductRoutes />
-                  </ProductProvider>
+                  <PrivateRoute>
+                    <ProductProvider>
+                      <ProductRoutes />
+                    </ProductProvider>
+                  </PrivateRoute>
                 }
               />
               <Route

@@ -9,23 +9,29 @@ export const AuthProvider = ({children}) =>{
     const navigate = useNavigate()
 
     useEffect(()=>{
-        const token = localStorage.getItem('token')
-        if(token){
-            const payload = JSON.parse(token.split('.')[1])
-            setUser({...payload, token})
+        const userLoged = JSON.parse(localStorage.getItem('user'))
+        if(userLoged){
+            setUser(userLoged)
         }
     },[])
 
     const login = async (credentials)=>{
         try {
             const response = await axios.post('http://localhost:3000/auth/login',credentials)
-
-            const token = response.token
-            localStorage.setItem('token', token)
-            const payload = JSON.parse(token.split('.')[1])
-            setUser({...payload, token})
-            navigate('/')
+            console.log(response);
+            if(response.status === 200){
+                const token = response?.data?.token
+                const userLogued = response?.data?.user
+                localStorage.setItem('token', token)
+                localStorage.setItem('user', JSON.stringify(userLogued))                
+                setUser(userLogued)
+                navigate('/')
+            }else{
+                alert('Las credenciales son erroneas')
+            }
         } catch (error) {
+            console.log(error);
+            
             alert("Hubo error al iniciar sesion")
         }
     }
@@ -47,6 +53,7 @@ export const AuthProvider = ({children}) =>{
     const logout = () =>{
         setUser(null)
         localStorage.removeItem('token')
+        localStorage.removeItem('user')
         navigate('/inicio-sesion')
     }
 
