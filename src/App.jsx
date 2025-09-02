@@ -12,7 +12,8 @@ import { UserProvider } from './context/UserContext'
 import { AuthProvider } from './context/AuthContext';
 import LoginForm from './layouts/auth/LoginForm';
 import RegisterForm from './layouts/auth/RegisterForm';
-
+import ForgotPassword from './layouts/auth/ForgotPassword';
+import ResetPassword from './layouts/auth/ResetPassword';
 import PrivateRoute from './utils/PrivateRoute';
 
 import './App.css';
@@ -29,6 +30,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path='/inicio-sesion' element={<LoginForm/>}/>
               <Route path='/registro' element={<RegisterForm/>}/>
+              <Route path='/clave-olvidada' element={<ForgotPassword/>}/>
+              <Route path='/recuperar-contraseña' element={<ResetPassword/>}/>
               <Route
                 path="/productos/*"
                 element={

@@ -6,11 +6,12 @@ import { InputText } from "primereact/inputtext"
 import { Password } from 'primereact/password';
 import { Card } from "primereact/card"
 import { Button } from "primereact/button"
+import { useNavigate } from "react-router-dom"
         
 const LoginForm = () =>{
 
     const {login} = useContext(AuthContext)
-
+    const navigate = useNavigate()
     const initialValuesUser = {
         email:'',
         password:''
@@ -43,6 +44,7 @@ const LoginForm = () =>{
                 </Form>
             )}
             </Formik>
+            <a style={{cursor:'pointer'}} onClick={()=> navigate('/clave-olvidada')}><h4>¿Olvidó su contraseña?</h4></a>
         </Card>
     )
 
