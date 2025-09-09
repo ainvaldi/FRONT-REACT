@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import axios from 'axios';
+import usersService from "../services/usersService";
 
 export const UserContext = createContext();
 
-const BASE_URL = 'http://localhost:3000/usuarios'
 
 export const UserProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
@@ -13,9 +12,9 @@ export const UserProvider = ({ children }) => {
     const getUsers = async () => {
         setLoading(true);
         try {
-            const { data: responseData } = await axios.get(BASE_URL);
-            console.log("Respuesta productos:", responseData);
-            setUsers(Array.isArray(responseData.data) ? responseData.data : []);
+            const { data: response } = await usersService.list();
+            console.log("Respuesta productos:", response);
+            setUsers(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
             setError(e.message);
         } finally {
@@ -26,8 +25,8 @@ export const UserProvider = ({ children }) => {
     const addUser = async (newUser) => {
         setLoading(true);
         try {
-            const { data: responseData } = await axios.post(BASE_URL, newUser);
-            const created = Array.isArray(responseData.data) ? responseData.data[0] : responseData.data || responseData;
+            const { data: response } = await usersService.create(newUser);
+            const created = Array.isArray(response.data) ? response.data[0] : response.data || response;
             setUsers(prev => Array.isArray(prev) ? [...prev, created] : [created]);
         } catch (e) {
             setError(e.message);
@@ -39,7 +38,7 @@ export const UserProvider = ({ children }) => {
     const editUser = async (id, updated) => {
         setLoading(true);
         try {
-            await axios.put(`${BASE_URL}/${id}`, updated);
+            await usersService.update(id, updated);
             setUsers(prev =>
                 prev.map(u => (u.id === id ? { ...updated, id: id } : u))
             );
@@ -52,7 +51,7 @@ export const UserProvider = ({ children }) => {
     
     const deleteUser = async (id) => {
         try {
-            await axios.delete(`${BASE_URL}/${id}`);
+            await usersService.remove(id);
             setUsers(prev => prev.filter(u => u.id !== id));
         } catch (e) {
             setError(e.message);

@@ -2,6 +2,7 @@ import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import authService from "../services/authService";
 
 export const AuthContext = createContext()
 
@@ -16,7 +17,6 @@ export const AuthProvider = ({children}) =>{
             if(!decoded.exp || decoded.exp * 1000 < Date.now()){
                 return null;
             }  
-            console.log("decoded", decoded);
             
             return{
                 id: decoded.user.id,
@@ -37,27 +37,24 @@ export const AuthProvider = ({children}) =>{
         const userLogued = decodeUser(token)
         if(userLogued){
         setUser(userLogued)
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
         }else{
             localStorage.removeItem('token')
-            delete axios.defaults.headers.common["Authorization"]
             setUser(null)
         }
     },[])
 
     const login = async (credentials)=>{
         try {
-            const response = await axios.post('http://localhost:3000/auth/login',credentials)
-            console.log(response);
-            if(response.status === 200){
-                const token = response?.data?.token
+            const {data, status} = await authService.login(credentials)
+            
+            if(status === 200){
+                const token = data?.token
                 localStorage.setItem('token', token)
-                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+
                 const userLogued = decodeUser(token)
-                console.log("userLogued", userLogued);
+
                 if(!userLogued){
                     localStorage.removeItem('token')
-                    delete axios.defaults.headers.common["Authorization"]
                     alert("Token invalido o esta expirado")
                     return
                 }
@@ -76,12 +73,12 @@ export const AuthProvider = ({children}) =>{
 
     const register = async (userData) =>{
         try {
-            const response = await axios.post('http://localhost:3000/auth/register', userData)
-            if(response.status === 201){
+            const {status, message} = await authService.register(userData)
+            if(status === 201){
                 alert("Usuario creado exitosamente")
                 navigate('/inicio-sesion')
             }else{
-                alert(response.message)
+                alert(message)
             }
         } catch (error) {
             alert("Hubo un error al registrar el usuario")
@@ -91,13 +88,12 @@ export const AuthProvider = ({children}) =>{
     const logout = () =>{
         setUser(null)
         localStorage.removeItem('token')
-        delete axios.defaults.headers.common["Authorization"]
         navigate('/inicio-sesion')
     }
 
     const forgotPassword = async (email) =>{
         try {
-            await axios.post('http://localhost:3000/auth/forgotPassword', {email})
+            await authService.forgot(email)
             alert("Revisa tu correo electronico")
             return true;
         } catch (error) {
@@ -106,8 +102,24 @@ export const AuthProvider = ({children}) =>{
         }
     }
 
+    const resetPassword = async({id, token, password})=>{
+        try {
+            const bodyResetPassword={
+                id: Number(id),
+                token,
+                password
+            }
+            await authService.reset(bodyResetPassword)
+            alert("Contraseña actualizada con exito")
+            return true
+        } catch (error) {
+            console.error("Hubo un error al actualizar la contraseña", error.response.data || error)
+            return false
+        }
+    }
+
     return(
-        <AuthContext.Provider value={{user, setUser, register, login, logout, forgotPassword}}>
+        <AuthContext.Provider value={{user, setUser, register, login, logout, forgotPassword, resetPassword}}>
             {children}
         </AuthContext.Provider>
     )

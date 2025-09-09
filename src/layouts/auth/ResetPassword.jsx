@@ -30,8 +30,60 @@ const ResetPassword = () =>{
         <Card title='Nueva contraseña'>
             {invalidLink ? <h5>Enlace invalido o incompleto</h5> : 
             
-            <Formik>
-                
+            <Formik
+            initialValues={{password: '', confirm: ''}}
+            validationSchema={resetSchema}
+            onSubmit={async(values, {resetForm})=>{
+                setLoading(true)
+                const response = await resetPassword({
+                    id: params.id,
+                    token: params.token,
+                    password: values.password
+                })
+                if(response){
+                    resetForm()
+                    navigate('/inicio-sesion')
+                }
+                setLoading(false)
+            }}
+            >
+             {({values, handleChange, handleBlur})=>(
+                <Form>
+                    <label>Nueva contraseña</label>
+                    <Password
+                    id='password'
+                    name='password'
+                    value={values.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Nueva contraseña"
+                    feedback={false}
+                    />
+                    <ErrorMessage name="password"/>
+
+                    <label>Repetir contraseña</label>
+
+                    <Password
+                    id='confirm'
+                    name='confirm'
+                    value={values.confirm}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Repetir contraseña"
+                    feedback={false}
+                    />
+
+                    <ErrorMessage name="confirm"/>
+
+                    <Button
+                    type="submit"
+                    label="Guardar contraseña"
+                    icon={loading ? "pi pi-spin pi-spinner" : 'pi pi-send'}
+                    />
+
+                </Form>
+
+             )}   
             </Formik>
 
             }

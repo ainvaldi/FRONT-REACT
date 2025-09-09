@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import axios from 'axios';
+import productService from "../services/productService";
 
 export const ProductContext = createContext();
 
-const BASE_URL = 'http://localhost:3000/productos';
 
 export const ProductProvider = ({ children }) => {
     const [products, setProducts] = useState([]);
@@ -13,9 +12,9 @@ export const ProductProvider = ({ children }) => {
     const getProducts = async () => {
         setLoading(true);
         try {
-            const { data: responseData } = await axios.get(BASE_URL);
-            console.log("Respuesta productos:", responseData);
-            setProducts(Array.isArray(responseData.data) ? responseData.data : []);
+            const { data: response } = await productService.list();
+            console.log("Respuesta productos:", response);
+            setProducts(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
             setError(e.message);
         } finally {
@@ -26,8 +25,8 @@ export const ProductProvider = ({ children }) => {
     const addProduct = async (newProduct) => {
         setLoading(true);
         try {
-            const { data: responseData } = await axios.post(BASE_URL, newProduct);
-            const created = Array.isArray(responseData.data) ? responseData.data[0] : responseData.data || responseData;
+            const { data: response } = await productService.create(newProduct);
+            const created = Array.isArray(response.data) ? response.data[0] : response.data || response;
             setProducts(prev => Array.isArray(prev) ? [...prev, created] : [created]);
         } catch (e) {
             setError(e.message);
@@ -39,7 +38,7 @@ export const ProductProvider = ({ children }) => {
     const editProduct = async (id, updated) => {
         setLoading(true);
         try {
-            await axios.put(`${BASE_URL}/${id}`, updated);
+            await productService.update(id, updated);
             setProducts(prev =>
                 prev.map(u => (u.id === id ? { ...updated, id: id } : u)));
         } catch (e) {
@@ -51,7 +50,7 @@ export const ProductProvider = ({ children }) => {
 
     const deleteProduct = async (id) => {
         try {
-            await axios.delete(`${BASE_URL}/${id}`);
+            await productService.remove(id);
             setProducts(prev => prev.filter(u => u.id !== id));
         } catch (e) {
             setError(e.message);

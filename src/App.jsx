@@ -15,6 +15,7 @@ import RegisterForm from './layouts/auth/RegisterForm';
 import ForgotPassword from './layouts/auth/ForgotPassword';
 import ResetPassword from './layouts/auth/ResetPassword';
 import PrivateRoute from './utils/PrivateRoute';
+import { RequireRole } from './utils/RequireRole';
 
 import './App.css';
 import 'primereact/resources/themes/lara-dark-indigo/theme.css';
@@ -45,9 +46,11 @@ function App() {
               <Route
                 path="/usuarios/*"
                 element={
-                  <UserProvider>
-                    <UserRoutes />
-                  </UserProvider>
+                  <PrivateRoute>
+                    <UserProvider>
+                      <UserRoutes />
+                    </UserProvider>
+                  </PrivateRoute>
                 }
               />
             </Routes>
