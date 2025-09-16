@@ -8,19 +8,36 @@ export const ProductProvider = ({ children }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [lazy, setLazy] = useState({
+        first: 0,
+        rows: 10,
+        page:0,
+        q:''
+    })
+    const [total, setTotal] = useState(null)
 
     const getProducts = async () => {
         setLoading(true);
         try {
-            const { data: response } = await productService.list();
+            const page = lazy.page + 1
+            const limit = lazy.rows
+            const q = lazy.q || ''
+            const { data: response } = await productService.listPaged({page, limit, q});
             console.log("Respuesta productos:", response);
             setProducts(Array.isArray(response.data) ? response.data : []);
+            setTotal(Number(response?.total || 0))
         } catch (e) {
             setError(e.message);
+            setProducts([])
+            setTotal(0)
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        getProducts();
+    }, [lazy.page, lazy.rows, lazy.q]);
 
     const addProduct = async (newProduct) => {
         setLoading(true);
@@ -57,9 +74,6 @@ export const ProductProvider = ({ children }) => {
         }
     };
 
-    useEffect(() => {
-        getProducts();
-    }, []);
 
     return (
         <ProductContext.Provider
@@ -70,7 +84,10 @@ export const ProductProvider = ({ children }) => {
                 getProducts,
                 addProduct,
                 editProduct,
-                deleteProduct
+                deleteProduct,
+                total,
+                lazy,
+                setLazy,
             }}
         >
             {children}

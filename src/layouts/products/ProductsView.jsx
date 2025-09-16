@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { DataTable } from 'primereact/datatable';  
 import { Column } from 'primereact/column';        
 import { Button } from 'primereact/button';   
+import { InputText } from 'primereact/inputtext';
 
 export default function ProductsView() {
-  const { products, deleteProduct, loading, error } = useProductContext();
+  const { products, deleteProduct, loading, error, lazy, setLazy, total } = useProductContext();
 
   const handleExport = () => {
     exportToPDF(products, 'Productos', ['nombre', 'precio']);
@@ -25,8 +26,23 @@ export default function ProductsView() {
 
       {loading && <p>Cargando productos...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      
+      <span>Buscar: </span>
+      <InputText 
+      value={lazy?.q}
+      onChange={(e)=> setLazy({...lazy, q: e.target.value, first:0, page:0})}
+      placeholder='Nombre del producto'/>
 
-      <DataTable value={Array.isArray(products) ? products : []} paginator={false} className="p-datatable-sm p-shadow-2 mt-4">
+      <DataTable 
+      value={Array.isArray(products) ? products : []} 
+      paginator
+      lazy
+      totalRecords={total}
+      first={lazy.first}
+      rows={lazy.rows}
+      onPage={(e)=>setLazy(e)} // e = {first, rows, page}
+      emptyMessage={lazy.q ? 'La busqueda no coincide': 'No hay productos registrados'}
+      className="p-datatable-sm p-shadow-2 mt-4">
         <Column field="nombre" header="Nombre" />
         <Column field="precio" header="Precio" />
 
